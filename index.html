@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b12">
+<title>MEGA HTML LAB</title>
+<style>
+:root{--bg:#080b12;--panel:#111827;--line:#263449;--text:#e5efff;--muted:#8fa4c3;--accent:#00f5b8;--purple:#a78bfa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,sans-serif}
+button,input,textarea{font:inherit}button{background:#18263a;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px 13px;cursor:pointer;transition:.15s}
+button:hover{border-color:var(--accent);transform:translateY(-1px)}button:active{transform:scale(.98)}
+header{padding:26px 18px;background:linear-gradient(130deg,#102b37,#17112c);border-bottom:1px solid var(--line)}
+header h1{margin:0;color:var(--accent);font-size:clamp(28px,6vw,44px)}header p{color:var(--muted);margin-bottom:0}
+nav{display:flex;gap:8px;overflow:auto;padding:12px;background:#0c111c;position:sticky;top:0;z-index:5}nav button{white-space:nowrap}
+main{padding:15px;max-width:1200px;margin:auto}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px}
+.panel{background:var(--panel);border:1px solid var(--line);padding:17px;border-radius:15px;min-width:0;margin-bottom:14px}
+h2{font-size:19px;margin:0 0 14px}h3{font-size:15px;color:var(--accent)}.muted{color:var(--muted)}.big{font-size:30px;font-weight:800;color:var(--accent)}
+input,textarea{width:100%;background:#080e18;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:11px;margin:5px 0}
+textarea{resize:vertical;min-height:120px}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
+.terminal{background:#03070b;color:var(--accent);padding:12px;height:245px;overflow:auto;border-radius:9px;font:13px monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.meter{height:8px;background:#253148;border-radius:9px;overflow:hidden}.meter span{display:block;height:100%;background:var(--accent);width:40%;transition:width .3s}
+canvas{display:block;width:100%;height:220px;background:#050b14;border:1px solid var(--line);border-radius:10px}
+#game{font-size:58px;text-align:center;padding:12px}#gameResult{min-height:28px}footer{text-align:center;color:var(--muted);padding:25px}
+.hidden{display:none!important}#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#00150e;padding:12px 18px;border-radius:12px;display:none;z-index:20;font-weight:bold}
+a{color:var(--accent)}.pill{display:inline-block;border:1px solid var(--line);padding:4px 8px;border-radius:99px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header><h1>⚡ MEGA HTML LAB</h1><p>One file. Zero libraries. Maximum tinkering.</p><p id="clock">Initializing...</p></header>
+<nav>
+<button onclick="go('dashboard')">🏠 Dashboard</button><button onclick="go('terminal')">⌨ Terminal</button>
+<button onclick="go('arcade')">🎮 Arcade</button><button onclick="go('tools')">🧰 Tools</button>
+<button onclick="go('notes')">📝 Notes</button><button onclick="go('visuals')">✨ Visuals</button>
+</nav>
+<main>
+<section id="dashboard">
+<div class="grid">
+<article class="panel"><h2>🖥️ Session overview</h2><p class="muted">Browser session status</p><div class="big" id="uptime">0s</div><p>Session uptime</p><p>Mode: <b style="color:var(--accent)">LOCAL</b></p><p>Viewport: <span id="screenInfo"></span></p><button onclick="toast('Diagnostics complete. The vibes are immaculate.')">Run diagnostics</button></article>
+<article class="panel"><h2>📊 Simulated telemetry</h2><p>CPU simulation</p><div class="meter"><span id="cpu"></span></div><p>Memory simulation</p><div class="meter"><span id="ram"></span></div><p>Network simulation</p><div class="meter"><span id="net"></span></div><p class="muted">Fictional values, not actual device readings.</p></article>
+<article class="panel"><h2>🎲 Random generator</h2><div class="big" id="random">42</div><div class="row"><button onclick="randomNumber()">Number</button><button onclick="randomWord()">Word</button></div></article>
+<article class="panel"><h2>🚀 Quick actions</h2><div class="row"><button onclick="go('terminal')">Open terminal</button><button onclick="go('arcade')">Play game</button></div><p></p><div class="row"><button onclick="changeTheme()">🎨 Theme</button><button onclick="fullscreen()">⛶ Fullscreen</button></div><p class="muted">Fullscreen depends on browser support.</p></article>
+</div>
+</section>
+<section id="terminal" class="hidden"><article class="panel"><h2>⌨️ Fake Linux terminal</h2><p class="muted">Try help, date, ls, whoami, neofetch, hack, matrix, fortune, or clear.</p><div id="term" class="terminal">MEGA OS [Version 1.0]\nWelcome, operator. Type help to begin.\n</div><form id="termForm" class="row"><input id="termInput" autocomplete="off" placeholder="Enter a simulated command..." aria-label="Terminal command"><button>Run</button></form><p class="muted">This is a simulator. Commands never execute on your actual device.</p></article></section>
+<section id="arcade" class="hidden"><div class="grid"><article class="panel"><h2>🎮 Click speed test</h2><p>Press start, then click as fast as you can for 10 seconds.</p><div class="big" id="clickCount">0</div><p id="gameResult">Ready when you are.</p><button id="clickStart" onclick="startClickGame()">Start 10-second round</button><button id="clickTarget" disabled onclick="countClick()">CLICK!</button></article><article class="panel"><h2>🔢 Guess the number</h2><p>I'm thinking of a number from 1 to 100.</p><input id="guessInput" type="number" min="1" max="100" placeholder="Your guess"><button onclick="guessNumber()">Guess</button><button onclick="newGuess()">New number</button><p id="guessResult">Pick a number!</p></article><article class="panel"><h2>🪨 Rock Paper Scissors</h2><div class="row"><button onclick="rps('Rock')">🪨 Rock</button><button onclick="rps('Paper')">📄 Paper</button><button onclick="rps('Scissors')">✂️ Scissors</button></div><p id="rpsResult">Choose your move.</p><p id="rpsScore">You 0 — 0 CPU</p></article></div></section>
+<section id="tools" class="hidden"><div class="grid">
+<article class="panel"><h2>🧮 Calculator</h2><input id="calcDisplay" placeholder="Example: (12 + 5) * 3" aria-label="Calculation"><div class="row"><button onclick="calculate()">Calculate</button><button onclick="document.getElementById('calcDisplay').value=''">Clear</button></div><p id="calcResult">Supports basic arithmetic and parentheses.</p></article>
+<article class="panel"><h2>🔐 Password generator</h2><label>Length <input id="passLength" type="number" min="8" max="64" value="20"></label><label><input id="passSymbols" type="checkbox" checked style="width:auto"> Include symbols</label><button onclick="makePassword()">Generate password</button><input id="passwordOut" readonly placeholder="Your password appears here"><button onclick="copyPassword()">Copy password</button><p class="muted">Generated locally in your browser.</p></article>
+<article class="panel"><h2>🔤 Text lab</h2><textarea id="textInput" placeholder="Type or paste text here..."></textarea><div class="row"><button onclick="transformText('upper')">UPPERCASE</button><button onclick="transformText('lower')">lowercase</button><button onclick="transformText('reverse')">Reverse</button></div><p id="textStats" class="muted">0 characters · 0 words</p><button onclick="copyText()">Copy text</button></article>
+<article class="panel"><h2>⏱️ Stopwatch</h2><div class="big" id="stopwatch">00:00.0</div><div class="row"><button onclick="startWatch()">Start</button><button onclick="stopWatch()">Stop</button><button onclick="resetWatch()">Reset</button></div></article>
+</div></section>
+<section id="notes" class="hidden"><article class="panel"><h2>📝 Local notes</h2><p class="muted">Notes are kept in this page while it remains open. No server or account needed.</p><textarea id="notesText" placeholder="Your ideas, commands, plans, and questionable inventions..."></textarea><div class="row"><button onclick="saveNotes()">Save in this session</button><button onclick="downloadNotes()">Download .txt</button><button onclick="clearNotes()">Clear notes</button></div><p id="notesStatus" class="muted">Ready.</p></article></section>
+<section id="visuals" class="hidden"><article class="panel"><h2>✨ Particle universe</h2><p class="muted">Tap or click inside the canvas to make a burst. Move your finger or mouse to stir the particles.</p><canvas id="space"></canvas><div class="row"><button onclick="particleBurst()">💥 Burst</button><button onclick="toggleParticles()">Pause / Resume</button><button onclick="changeTheme()">🎨 Change theme</button></div></article><article class="panel"><h2>🌈 Color generator</h2><div class="big" id="hexColor">#00F5B8</div><button onclick="newColor()">Generate color</button><button onclick="copyColor()">Copy hex</button></article></section>
+</main>
+<footer>MEGA HTML LAB · Built with plain HTML, CSS, and JavaScript · No libraries or paid services</footer>
+<div id="toast" role="status"></div>
+<script>
+const $=id=>document.getElementById(id);
+const started=Date.now();
+function go(id){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));$(id).classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});}
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.display='none',2200);}
+function changeTheme(){const themes=[['#080b12','#111827','#00f5b8','#a78bfa'],['#100819','#21102e','#ff71ce','#01cdfe'],['#101610','#1b2a1b','#b6ff6b','#ffd166'],['#10151d','#202c3c','#7dd3fc','#f0abfc']];const t=themes[Math.floor(Math.random()*themes.length)];document.documentElement.style.setProperty('--bg',t[0]);document.documentElement.style.setProperty('--panel',t[1]);document.documentElement.style.setProperty('--accent',t[2]);document.documentElement.style.setProperty('--purple',t[3]);toast('Theme changed!');}
+function fullscreen(){if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.();}
+function randomNumber(){$('random').textContent=Math.floor(Math.random()*1000000).toLocaleString();}
+function randomWord(){$('random').textContent=['POTATO','CYBERPUNK','MOON','GLITCH','CHEDDAR','LASER','TURBO','WIZARD','NOODLE','HYPERDRIVE'][Math.floor(Math.random()*10)];}
+function tick(){const s=Math.floor((Date.now()-started)/1000);$('uptime').textContent=s<60?s+'s':Math.floor(s/60)+'m '+s%60+'s';$('clock').textContent=new Date().toLocaleString();$('screenInfo').textContent=innerWidth+' × '+innerHeight;['cpu','ram','net'].forEach(id=>$(id).style.width=(8+Math.random()*88)+'%');}
+setInterval(tick,1000);tick();
+const termLines=['MEGA OS [Version 1.0]','Welcome, operator. Type help to begin.'];
+function writeTerm(s){const t=$('term');t.textContent+=s+'\n';t.scrollTop=t.scrollHeight;}
+$('termForm').addEventListener('submit',e=>{e.preventDefault();const raw=$('termInput').value.trim();if(!raw)return;const cmd=raw.toLowerCase();writeTerm('operator@mega:~$ '+raw);$('termInput').value='';const responses={help:'Commands: help, date, ls, pwd, whoami, neofetch, fortune, hack, matrix, echo TEXT, clear, about',date:new Date().toString(),ls:'index.html  README.md  imagination/  snacks/  secrets.txt',pwd:'/home/operator/mega-html-lab',whoami:'operator (simulated user)',neofetch:'MEGA OS 1.0\nKernel: Browser JavaScript\nShell: pretend-bash\nHardware: your actual browser, mostly\nUptime: '+Math.floor((Date.now()-started)/1000)+' seconds',fortune:['A bug is just an undocumented feature wearing a disguise.','Keep calm and grep on.','The cake is a lie, but the snacks are real.','Today is a good day to learn something.'][Math.floor(Math.random()*4)],hack:'Initializing totally fake hacking sequence...\n[OK] Accessing imaginary mainframe\n[OK] Deploying virtual ducks\n[OK] Downloading 9000 gigabytes of vibes\nACCESS GRANTED TO THE SNACK DRAWER.',matrix:'01001000 01000101 01001100 01001100 01001111\nWake up, operator... just kidding.',about:'MEGA HTML LAB: a harmless client-side playground.'};if(cmd==='clear'){$('term').textContent='';return;}if(cmd.startsWith('echo ')){writeTerm(raw.slice(5));return;}writeTerm(responses[cmd]||'Command not found: '+raw+'\nType help for available commands.');});
+let clickTimer=null,clicks=0,clickActive=false;
+function startClickGame(){clearInterval(clickTimer);clicks=0;clickActive=true;$('clickCount').textContent='0';$('gameResult').textContent='GO! Click quickly!';$('clickTarget').disabled=false;$('clickStart').disabled=true;let left=10;$('clickStart').textContent=left+'s left';clickTimer=setInterval(()=>{left--;$('clickStart').textContent=left+'s left';if(left<=0){clearInterval(clickTimer);clickActive=false;$('clickTarget').disabled=true;$('clickStart').disabled=false;$('clickStart').textContent='Play again';$('gameResult').textContent='Final score: '+clicks+' clicks ('+(clicks/10).toFixed(1)+' per second).';}},1000);}
+function countClick(){if(clickActive){clicks++;$('clickCount').textContent=clicks;}}
+let secret=1;function newGuess(){secret=1+Math.floor(Math.random()*100);$('guessResult').textContent='New number chosen. Good luck!';$('guessInput').value='';}
+function guessNumber(){const n=Number($('guessInput').value);if(!n||n<1||n>100){$('guessResult').textContent='Enter a number from 1 to 100.';return;}$('guessResult').textContent=n===secret?'🎉 Correct! You got it!':n<secret?'Too low! Try higher.':'Too high! Try lower.';}
+newGuess();let you=0,cpu=0;
+function rps(move){const opts=['Rock','Paper','Scissors'];const c=opts[Math.floor(Math.random()*3)];let msg='Tie!';if(move!==c){if((move==='Rock'&&c==='Scissors')||(move==='Paper'&&c==='Rock')||(move==='Scissors'&&c==='Paper')){you++;msg='You win!';}else{cpu++;msg='CPU wins!';}}$('rpsResult').textContent='You: '+move+' · CPU: '+c+' — '+msg;$('rpsScore').textContent='You '+you+' — '+cpu+' CPU';}
+function calculate(){const s=$('calcDisplay').value.trim();if(!/^[0-9+\-*/().%\s]+$/.test(s)||!s){$('calcResult').textContent='Use numbers and basic operators only.';return;}try{const result=Function('"use strict";return ('+s+')')();$('calcResult').textContent=Number.isFinite(result)?'Result: '+result:'Invalid calculation';}catch{$('calcResult').textContent='Invalid expression.';}}
+function makePassword(){const len=Math.max(8,Math.min(64,Number($('passLength').value)||20));let chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';if($('passSymbols').checked)chars+='!@#$%^&*()-_=+[]{}?';let out='';const cryptoObj=window.crypto;if(cryptoObj&&cryptoObj.getRandomValues){const a=new Uint32Array(len);cryptoObj.getRandomValues(a);for(let i=0;i<len;i++)out+=chars[a[i]%chars.length];}else{for(let i=0;i<len;i++)out+=chars[Math.floor(Math.random()*chars.length)];}$('passwordOut').value=out;}
+async function copyTextValue(s){try{await navigator.clipboard.writeText(s);toast('Copied!');}catch{const a=document.createElement('textarea');a.value=s;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('Copied!');}}
+function copyPassword(){if($('passwordOut').value)copyTextValue($('passwordOut').value);else toast('Generate a password first.');}
+function transformText(mode){const e=$('textInput');if(mode==='upper')e.value=e.value.toUpperCase();if(mode==='lower')e.value=e.value.toLowerCase();if(mode==='reverse')e.value=[...e.value].reverse().join('');updateTextStats();}
+function updateTextStats(){const s=$('textInput').value;$('textStats').textContent=s.length+' characters · '+(s.trim()?s.trim().split(/\s+/).length:0)+' words';}
+$('textInput').addEventListener('input',updateTextStats);function copyText(){copyTextValue($('textInput').value);}
+let watchStart=0,watchElapsed=0,watchTimer=null;
+function drawWatch(){const ms=watchElapsed+(watchStart?Date.now()-watchStart:0);const m=Math.floor(ms/60000),s=Math.floor(ms/1000)%60,d=Math.floor(ms/100)%10;$('stopwatch').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+d;}
+function startWatch(){if(watchStart)return;watchStart=Date.now();watchTimer=setInterval(drawWatch,100);}
+function stopWatch(){if(!watchStart)return;watchElapsed+=Date.now()-watchStart;watchStart=0;clearInterval(watchTimer);drawWatch();}
+function resetWatch(){stopWatch();watchElapsed=0;drawWatch();}
+function saveNotes(){try{sessionStorage.setItem('mega-notes',$('notesText').value);$('notesStatus').textContent='Saved for this browser session.';}catch{$('notesStatus').textContent='Session storage unavailable; download your notes instead.';}}
+try{$('notesText').value=sessionStorage.getItem('mega-notes')||'';}catch{}
+function downloadNotes(){const blob=new Blob([$('notesText').value],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mega-notes.txt';a.click();URL.revokeObjectURL(a.href);toast('Notes download requested.');}
+function clearNotes(){if(confirm('Clear all notes in this page?')){$('notesText').value='';try{sessionStorage.removeItem('mega-notes');}catch{}$('notesStatus').textContent='Notes cleared.';}}
+function newColor(){const c='#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0').toUpperCase();$('hexColor').textContent=c;$('hexColor').style.color=c;}
+function copyColor(){copyTextValue($('hexColor').textContent);}
+const canvas=$('space'),ctx=canvas.getContext('2d');let particles=[],paused=false,pointer={x:0,y:0};
+function resizeCanvas(){const r=canvas.getBoundingClientRect();const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(1,Math.floor(r.width*d));canvas.height=Math.max(1,Math.floor(r.height*d));ctx.setTransform(d,0,0,d,0,0);}
+function burst(x,y,n=35){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=.5+Math.random()*3;particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:40+Math.random()*60,r:1+Math.random()*2});}if(particles.length>600)particles=particles.slice(-600);}
+function particleBurst(){burst(canvas.clientWidth/2,canvas.clientHeight/2,100);}
+function toggleParticles(){paused=!paused;toast(paused?'Particles paused':'Particles resumed');}
+function animate(){requestAnimationFrame(animate);if(paused)return;const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vx*=.99;p.vy*=.99;p.life--;ctx.globalAlpha=Math.max(0,p.life/100);ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--accent');ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();if(p.life<=0)particles.splice(i,1);}ctx.globalAlpha=1;}
+canvas.addEventListener('pointerdown',e=>{const r=canvas.getBoundingClientRect();burst(e.clientX-r.left,e.clientY-r.top,45);});
+canvas.addEventListener('pointermove',e=>{if(e.buttons){const r=canvas.getBoundingClientRect();burst(e.clientX-r.left,e.clientY-r.top,3);}});
+window.addEventListener('resize',resizeCanvas);resizeCanvas();for(let i=0;i<90;i++)burst(Math.random()*canvas.clientWidth,Math.random()*canvas.clientHeight,1);animate();
+</script>
+</body>
+</html>
