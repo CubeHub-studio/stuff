@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BashBrowse</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui,sans-serif;background:#11131a;color:#f4f4fa}
+*{box-sizing:border-box}body{margin:0;height:100dvh;display:flex;flex-direction:column}
+header{padding:12px;background:#1b1e29;border-bottom:1px solid #35394a}
+.brand{font-weight:800;font-size:1.1rem;margin-bottom:10px;color:#c5a7ff}
+.controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+button,input{font:inherit;border:1px solid #44495d;border-radius:9px;padding:9px 12px}
+button{background:#292d3d;color:#fff;cursor:pointer}button:hover{background:#414763}button:disabled{opacity:.4}
+#address{flex:1;min-width:150px;background:#10121a;color:#fff}
+#status{font-size:.8rem;color:#b8bdd0;margin-top:8px}
+main{flex:1;min-height:0;background:white;position:relative}
+iframe{width:100%;height:100%;border:0;background:white}
+#notice{display:none;position:absolute;inset:auto 12px 12px 12px;background:#25293a;color:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 12px #0005}
+@media(max-width:500px){button{padding:8px 10px}header{padding:9px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">🌐 BashBrowse</div>
+  <form class="controls" id="nav">
+    <button type="button" id="back" title="Back">←</button>
+    <button type="button" id="forward" title="Forward">→</button>
+    <button type="button" id="reload" title="Reload">↻</button>
+    <input id="address" aria-label="Website address" placeholder="Enter a website, e.g. https://example.com" value="https://htmlonly.com/" autocomplete="url">
+    <button type="submit">Go</button>
+    <button type="button" id="home">Home</button>
+    <button type="button" id="external">Open tab ↗</button>
+  </form>
+  <div id="status" role="status">Ready · Enter a URL and press Go</div>
+</header>
+<main>
+  <iframe id="page" title="Website page" src="https://htmlonly.com/" referrerpolicy="no-referrer"></iframe>
+  <div id="notice">This website may block being displayed inside BashBrowse. Use <b>Open tab ↗</b> to view it directly in your browser.</div>
+</main>
+<script>
+(() => {
+ const frame=document.getElementById('page'), address=document.getElementById('address'), status=document.getElementById('status'), notice=document.getElementById('notice');
+ const historyList=['https://htmlonly.com/']; let index=0;
+ function normalize(value){value=value.trim();if(!value)return '';if(!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value))value='https://'+value;try{const u=new URL(value);if(!['http:','https:'].includes(u.protocol))return '';return u.href}catch{return ''}}
+ function go(value,save=true){const url=normalize(value);if(!url){status.textContent='Please enter a valid http:// or https:// address.';return}address.value=url;frame.src=url;notice.style.display='none';status.textContent='Loading '+url;if(save){historyList.splice(index+1);historyList.push(url);index=historyList.length-1}buttons()}
+ function buttons(){document.getElementById('back').disabled=index<=0;document.getElementById('forward').disabled=index>=historyList.length-1}
+ document.getElementById('nav').addEventListener('submit',e=>{e.preventDefault();go(address.value)});
+ document.getElementById('back').addEventListener('click',()=>{if(index>0){index--;go(historyList[index],false)}buttons()});
+ document.getElementById('forward').addEventListener('click',()=>{if(index<historyList.length-1){index++;go(historyList[index],false)}buttons()});
+ document.getElementById('reload').addEventListener('click',()=>{notice.style.display='none';frame.src=address.value;status.textContent='Reloading '+address.value});
+ document.getElementById('home').addEventListener('click',()=>go('https://htmlonly.com/'));
+ document.getElementById('external').addEventListener('click',()=>window.open(address.value,'_blank','noopener'));
+ frame.addEventListener('load',()=>{status.textContent='Page loaded · '+address.value+' · Some sites block embedded viewing';setTimeout(()=>{notice.style.display='block'},1800)});
+ address.addEventListener('keydown',e=>{if(e.key==='Escape'){address.value=frame.src}});
+ buttons();
+})();
+</script>
+</body>
+</html>
