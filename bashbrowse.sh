@@ -4,16 +4,44 @@
 
 set -u
 
-# Prefer the clickable graphical interface when a desktop/mobile browser opener exists.
+# Serve the GUI over localhost instead of opening a Termux-private file:// URL.
+# Android Chrome cannot reliably read files directly from Termux's private storage.
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "$SCRIPT_DIR/bashbrowse.html" ]]; then
-    if command -v termux-open >/dev/null 2>&1; then
-        termux-open "$SCRIPT_DIR/bashbrowse.html" && exit 0
-    elif command -v xdg-open >/dev/null 2>&1; then
-        xdg-open "$SCRIPT_DIR/bashbrowse.html" >/dev/null 2>&1 &
-        exit 0
-    elif command -v open >/dev/null 2>&1; then
-        open "$SCRIPT_DIR/bashbrowse.html" && exit 0
+GUI_URL="http://127.0.0.1:8765/bashbrowse.html"
+
+if [[ -f "$SCRIPT_DIR/bashbrowse.html" ]] && command -v python3 >/dev/null 2>&1; then
+    if ! curl -fsS --max-time 1 "$GUI_URL" >/dev/null 2>&1; then
+        python3 -m http.server 8765 --bind 127.0.0.1 --directory "$SCRIPT_DIR" \
+            >"$SCRIPT_DIR/.bashbrowse-server.log" 2>&1 &
+        SERVER_PID=$!
+        # Wait briefly for the local server to start.
+        for _ in {1..20}; do
+            if curl -fsS --max-time 1 "$GUI_URL" >/dev/null 2>&1; then
+                break
+            fi
+            sleep 0.25
+        done
+    fi
+
+    if curl -fsS --max-time 2 "$GUI_URL" >/dev/null 2>&1; then
+        if command -v termux-open-url >/dev/null 2>&1; then
+            termux-open-url "$GUI_URL"
+            exit $?
+        elif command -v termux-open >/dev/null 2>&1; then
+            termux-open "$GUI_URL"
+            exit $?
+        elif command -v xdg-open >/dev/null 2>&1; then
+            xdg-open "$GUI_URL" >/dev/null 2>&1 &
+            exit 0
+        elif command -v open >/dev/null 2>&1; then
+            open "$GUI_URL"
+            exit $?
+        else
+            printf 'BashBrowse GUI is running at: %s\n' "$GUI_URL"
+            exit 0
+        fi
+    else
+        printf 'Could not start the BashBrowse web server. See %s/.bashbrowse-server.log\n' "$SCRIPT_DIR" >&2
     fi
 fi
 
