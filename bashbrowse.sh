@@ -4,6 +4,19 @@
 
 set -u
 
+# Prefer the clickable graphical interface when a desktop/mobile browser opener exists.
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/bashbrowse.html" ]]; then
+    if command -v termux-open >/dev/null 2>&1; then
+        termux-open "$SCRIPT_DIR/bashbrowse.html" && exit 0
+    elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$SCRIPT_DIR/bashbrowse.html" >/dev/null 2>&1 &
+        exit 0
+    elif command -v open >/dev/null 2>&1; then
+        open "$SCRIPT_DIR/bashbrowse.html" && exit 0
+    fi
+fi
+
 URL="https://example.com"
 declare -a HISTORY=()
 PAGE_HTML=""
